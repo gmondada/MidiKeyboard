@@ -10,9 +10,15 @@ import SwiftUI
 
 @main
 struct MidiKeyboardApp: App {
+
+    let keyboardModel = MidiIOKeyboardModel()
+
     var body: some Scene {
         WindowGroup {
-            KeyboardView(model: MidiIOKeyboardModel())
+            VStack {
+                PedalView(model: keyboardModel)
+                KeyboardView(model: keyboardModel)
+            }
         }
     }
 }

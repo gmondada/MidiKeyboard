@@ -9,15 +9,18 @@
 import Foundation
 import Combine
 
-class MidiIOKeyboardModel: KeyboardModel {
+class MidiIOKeyboardModel: KeyboardModel, PedalModel {
     private let io: MidiIO
     private let states: [CurrentValueSubject<Bool, Never>] = (0..<88).map { _ in CurrentValueSubject<Bool, Never>(false) }
+    private let pedalStateSubject = CurrentValueSubject<PedalState, Never>([])
     private var cancellables: [Cancellable] = []
 
     init() {
         io = MidiIO(appName: "Midi Keyboard App")
         io.open()
+        #if os(macOS)
         io.createVirtualOutputPort(name: "Midi Keyboard App", fourcc: "oilu")
+        #endif
         let cancellable = io.incomingMessagePublisher.sink { [weak self] message in
             self?.onIncomingMidiMessage(message)
         }
@@ -30,6 +33,53 @@ class MidiIOKeyboardModel: KeyboardModel {
             io.close()
         }
     }
+
+    private func onIncomingMidiMessage(_ message: MidiIO.Message) {
+        if message.size == 3 {
+            let cmd = (message.b0 >> 4) & 0x0F
+            // let channel = message.b0 & 0x0F
+            let note = message.b1 & 0x7F
+            let vel = message.b2
+            let noteOn = ((cmd == 9) && (vel != 0))
+            let noteOff = ((cmd == 8) || ((cmd == 9) && (vel == 0)))
+            let controlChange = cmd == 11
+            let keyIndex = Int(note) + 3 - 24
+
+            if noteOn && keyIndex >= 0 && keyIndex < 88 && !self.states[keyIndex].value {
+                self.states[keyIndex].value = true
+            }
+            if noteOff && keyIndex >= 0 && keyIndex < 88 && self.states[keyIndex].value {
+                self.states[keyIndex].value = false
+            }
+
+            if controlChange && note == 0x40 {
+                let damper = vel != 0
+                if pedalStateSubject.value.contains(.damper) {
+                    if !damper {
+                        pedalStateSubject.value.remove(.damper)
+                    }
+                } else {
+                    if damper {
+                        pedalStateSubject.value.insert(.damper)
+                    }
+                }
+            }
+            if controlChange && note == 0x43 {
+                let soft = vel != 0
+                if pedalStateSubject.value.contains(.soft) {
+                    if !soft {
+                        pedalStateSubject.value.remove(.soft)
+                    }
+                } else {
+                    if soft {
+                        pedalStateSubject.value.insert(.soft)
+                    }
+                }
+            }
+        }
+    }
+
+    // MARK: - KeyboardModel
 
     var glissandoKeyIndex: Int = -1
 
@@ -52,21 +102,56 @@ class MidiIOKeyboardModel: KeyboardModel {
         }
     }
 
-    private func onIncomingMidiMessage(_ message: MidiIO.Message) {
-        if message.size == 3 {
-            let cmd = (message.b0 >> 4) & 0x0F
-            // let channel = message.b0 & 0x0F
-            let note = message.b1 & 0x7F
-            let vel = message.b2
-            let noteOn = ((cmd == 9) && (vel != 0))
-            let noteOff = ((cmd == 8) || ((cmd == 9) && (vel == 0)))
-            let keyIndex = Int(note) + 3 - 24
+    // MARK: - PedalModel
 
-            if noteOn && keyIndex >= 0 && keyIndex < 88 && !self.states[keyIndex].value {
-                self.states[keyIndex].value = true
+    var pedalStatePublisher: AnyPublisher<PedalState, Never> {
+        return pedalStateSubject.eraseToAnyPublisher()
+    }
+
+    var pedalState: PedalState {
+        get {
+            return pedalStateSubject.value
+        }
+        set {
+            setPedalState(newValue)
+        }
+    }
+
+    private func setPedalState(_ state: PedalState) {
+        let damper = state.contains(.damper)
+        let soft = state.contains(.soft)
+        if pedalStateSubject.value.contains(.damper) {
+            if !damper {
+                pedalStateSubject.value.remove(.damper)
+                let msg = MidiIO.Message(0xb0, 0x40, 0)
+                for port in io.outputPorts {
+                    port.send(msg)
+                }
             }
-            if noteOff && keyIndex >= 0 && keyIndex < 88 && self.states[keyIndex].value {
-                self.states[keyIndex].value = false
+        } else {
+            if damper {
+                pedalStateSubject.value.insert(.damper)
+                let msg = MidiIO.Message(0xb0, 0x40, 127)
+                for port in io.outputPorts {
+                    port.send(msg)
+                }
+            }
+        }
+        if pedalStateSubject.value.contains(.soft) {
+            if !soft {
+                pedalStateSubject.value.remove(.soft)
+                let msg = MidiIO.Message(0xb0, 0x43, 0)
+                for port in io.outputPorts {
+                    port.send(msg)
+                }
+            }
+        } else {
+            if soft {
+                pedalStateSubject.value.insert(.soft)
+                let msg = MidiIO.Message(0xb0, 0x43, 127)
+                for port in io.outputPorts {
+                    port.send(msg)
+                }
             }
         }
     }

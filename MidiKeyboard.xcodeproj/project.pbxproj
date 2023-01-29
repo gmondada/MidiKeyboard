@@ -23,6 +23,10 @@
 		E05937AB290081BD0050E7AB /* MidiKeyboardApp_macOS.swift in Sources */ = {isa = PBXBuildFile; fileRef = E05937AA290081BD0050E7AB /* MidiKeyboardApp_macOS.swift */; };
 		E05937AF290081BE0050E7AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E05937AE290081BE0050E7AB /* Assets.xcassets */; };
 		E05937B2290081BE0050E7AB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E05937B1290081BE0050E7AB /* Preview Assets.xcassets */; };
+		E0E5C4DB2985DB2A009C2697 /* PedalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E5C4DA2985DB2A009C2697 /* PedalModel.swift */; };
+		E0E5C4DC2985DB2A009C2697 /* PedalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E5C4DA2985DB2A009C2697 /* PedalModel.swift */; };
+		E0E5C4DE2985DCC2009C2697 /* PedalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E5C4DD2985DCC2009C2697 /* PedalView.swift */; };
+		E0E5C4DF2985DCC2009C2697 /* PedalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0E5C4DD2985DCC2009C2697 /* PedalView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +44,8 @@
 		E05937AE290081BE0050E7AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E05937B1290081BE0050E7AB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E05937B3290081BE0050E7AB /* MidiKeyboard.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MidiKeyboard.entitlements; sourceTree = "<group>"; };
+		E0E5C4DA2985DB2A009C2697 /* PedalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedalModel.swift; sourceTree = "<group>"; };
+		E0E5C4DD2985DCC2009C2697 /* PedalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PedalView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,7 +71,9 @@
 			children = (
 				E047D07A2902E4CF0029B4A2 /* KeyboardGeometry.swift */,
 				E047D0782902E4AD0029B4A2 /* KeyboardView.swift */,
+				E0E5C4DD2985DCC2009C2697 /* PedalView.swift */,
 				E047D07C2902E7330029B4A2 /* KeyboardModel.swift */,
+				E0E5C4DA2985DB2A009C2697 /* PedalModel.swift */,
 				E02E3E902906C84100617F16 /* MidiIOKeyboardModel.swift */,
 				E02E3E8E29057D8400617F16 /* MidiIO.swift */,
 			);
@@ -230,6 +238,8 @@
 			files = (
 				E04DD547290AEC8F00F99909 /* KeyboardModel.swift in Sources */,
 				E04DD548290AEC8F00F99909 /* MidiIOKeyboardModel.swift in Sources */,
+				E0E5C4DC2985DB2A009C2697 /* PedalModel.swift in Sources */,
+				E0E5C4DF2985DCC2009C2697 /* PedalView.swift in Sources */,
 				E04DD546290AEC8F00F99909 /* KeyboardGeometry.swift in Sources */,
 				E04DD549290AEC8F00F99909 /* KeyboardView.swift in Sources */,
 				E04DD545290AEC8F00F99909 /* MidiIO.swift in Sources */,
@@ -243,6 +253,8 @@
 			files = (
 				E047D07D2902E7330029B4A2 /* KeyboardModel.swift in Sources */,
 				E02E3E912906C84100617F16 /* MidiIOKeyboardModel.swift in Sources */,
+				E0E5C4DB2985DB2A009C2697 /* PedalModel.swift in Sources */,
+				E0E5C4DE2985DCC2009C2697 /* PedalView.swift in Sources */,
 				E02E3E8F29057D8400617F16 /* MidiIO.swift in Sources */,
 				E047D0792902E4AD0029B4A2 /* KeyboardView.swift in Sources */,
 				E047D07B2902E4CF0029B4A2 /* KeyboardGeometry.swift in Sources */,
@@ -446,6 +458,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.ijk.MidiKeyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -471,6 +484,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = ch.ijk.MidiKeyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
