@@ -39,6 +39,13 @@ final class MidiIO {
     }
 
     final class Port {
+        /*
+         * Each port correspond to a combination of device, entity and extension index.
+         * The extension index is needed for accomodating entities having several inputs
+         * or outputs, but who knows if they exist.
+         * Virtual input and output ports have "VirtualInput" and "VirtualOutput" as device id and
+         * their endpoint id as entity id. Their extension index is always 0.
+         */
 
         let io: MidiIO
         let index: Int
@@ -186,6 +193,7 @@ final class MidiIO {
         if midiClient != 0 {
             self.midiClient = midiClient
             scanForPhysicalPorts()
+            scanForVirtualPorts()
         }
     }
 
@@ -313,9 +321,50 @@ final class MidiIO {
                 }
             }
         }
+    }
 
-        for port in ports {
-            Util.log("port index=\(port.index) id=\(port.id) name=\"\(port.name)\"")
+    private func scanForVirtualPorts() {
+        let numOfSources = MIDIGetNumberOfSources()
+        for sourceIndex in 0 ..< numOfSources {
+            let sourceEndpoint = MIDIGetSource(sourceIndex)
+            Util.log("source \(sourceIndex):")
+            Util.log("  properties:")
+            Util.logObjectProperties(sourceEndpoint, "    ");
+
+            guard let entityId = sourceEndpoint.uniqueId else {
+                continue
+            }
+
+            let entityName = sourceEndpoint.name ?? "Source \(entityId)"
+
+            guard !ports.contains(where: { $0.deviceId == "VirtualOutput" && $0.entityId == entityId }) else {
+                continue
+            }
+
+            let port: Port
+            if let foundPort = ports.first(where: { $0.deviceId == "VirtualInput" && $0.entityId == entityId }) {
+                if foundPort.inputEndpoint != sourceEndpoint {
+                    port = foundPort
+                    // disabling previous endpoint results in an error
+                    // MIDIPortDisconnectSource(port.inputPort, port.inputEndpoint)
+                    port.inputEndpoint = 0
+                    port.isInputEnabled = false
+                    port.inputEndpoint = sourceEndpoint
+                    if areInputsEnabled {
+                        port.isInputEnabled = true
+                    }
+                }
+            } else {
+                port = Port(io: self, index: portsSubject.value.count, deviceId: "VirtualInput", entityId: entityId, entityExtensionIndex: 0, name: entityName)
+                portsSubject.value.append(port)
+                port.inputEndpointId = entityId
+                port.inputEndpoint = sourceEndpoint
+                createInputPort()
+                port.inputPort = self.inputPort
+                if areInputsEnabled {
+                    port.isInputEnabled = true
+                }
+            }
         }
     }
 
@@ -439,6 +488,10 @@ final class MidiIO {
             self.portRefreshRequestCount -= 1
             if self.portRefreshRequestCount == 0 && self.midiClient != 0 {
                 self.scanForPhysicalPorts()
+                self.scanForVirtualPorts()
+                for port in self.ports {
+                    Util.log("port index=\(port.index) id=\(port.id) name=\"\(port.name)\"")
+                }
             }
         }
     }
