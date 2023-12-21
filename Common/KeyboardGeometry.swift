@@ -64,11 +64,11 @@ class KeyboardGeometry {
         gap = max(pixelLength, align(keyboardWidth / 1000))
         rawWhiteKeyWidth = (keyboardWidth - gap) / CGFloat(whiteKeyCount)
         let rawBlackKeyWidth = rawWhiteKeyWidth * 14.0 / 24.0
-        let rawBlackKeyDistance = rawBlackKeyWidth
         let rawWhiteKeyLength = size.height - 2 * gap
         let rawBlackKeyLength = rawWhiteKeyLength * 0.65
         let blackKeyWidth = align(rawBlackKeyWidth)
-        let blackKeyDistance = align(rawBlackKeyDistance)
+        let blackKeyDistanceWhen2 = align(rawBlackKeyWidth)
+        let blackKeyDistanceWhen3 = align(rawBlackKeyWidth * 0.95)
         whiteKeyLength = align(rawWhiteKeyLength)
         blackKeyLength = align(rawBlackKeyLength)
         preferredSize = CGSize(width: align(keyboardWidth), height: whiteKeyLength + 2 * gap)
@@ -80,22 +80,22 @@ class KeyboardGeometry {
 
         for i in 0..<7 {
             let mid2 = 0.5 * gap + rawWhiteKeyWidth * (3.5 + 7 * CGFloat(i))
-            let left2 = align(mid2 - 0.5 * blackKeyDistance - blackKeyWidth)
+            let left2 = align(mid2 - 0.5 * blackKeyDistanceWhen2 - blackKeyWidth)
             keyGeometries[4 + 12 * i].isBlack = true
             keyGeometries[4 + 12 * i].topLeft = left2
             keyGeometries[4 + 12 * i].bottomLeft = left2
             keyGeometries[4 + 12 * i].topRight = left2 + blackKeyWidth
             keyGeometries[4 + 12 * i].bottomRight = left2 + blackKeyWidth
             keyGeometries[6 + 12 * i].isBlack = true
-            keyGeometries[6 + 12 * i].topLeft = left2 + blackKeyWidth + blackKeyDistance
-            keyGeometries[6 + 12 * i].bottomLeft = left2 + blackKeyWidth + blackKeyDistance
-            keyGeometries[6 + 12 * i].topRight = left2 + 2 * blackKeyWidth + blackKeyDistance
-            keyGeometries[6 + 12 * i].bottomRight = left2 + 2 * blackKeyWidth + blackKeyDistance
+            keyGeometries[6 + 12 * i].topLeft = left2 + blackKeyWidth + blackKeyDistanceWhen2
+            keyGeometries[6 + 12 * i].bottomLeft = left2 + blackKeyWidth + blackKeyDistanceWhen2
+            keyGeometries[6 + 12 * i].topRight = left2 + 2 * blackKeyWidth + blackKeyDistanceWhen2
+            keyGeometries[6 + 12 * i].bottomRight = left2 + 2 * blackKeyWidth + blackKeyDistanceWhen2
         }
 
         for i in -1..<7 {
             let mid3 = 0.5 * gap + rawWhiteKeyWidth * (7 + 7 * CGFloat(i))
-            let left3 = align(mid3 - 1.5 * blackKeyWidth - blackKeyDistance)
+            let left3 = align(mid3 - 1.5 * blackKeyWidth - blackKeyDistanceWhen3)
             if i >= 0 {
                 keyGeometries[9 + 12 * i].isBlack = true
                 keyGeometries[9 + 12 * i].topLeft = left3
@@ -103,16 +103,16 @@ class KeyboardGeometry {
                 keyGeometries[9 + 12 * i].topRight = left3 + blackKeyWidth
                 keyGeometries[9 + 12 * i].bottomRight = left3 + blackKeyWidth
                 keyGeometries[11 + 12 * i].isBlack = true
-                keyGeometries[11 + 12 * i].topLeft = left3 + blackKeyWidth + blackKeyDistance
-                keyGeometries[11 + 12 * i].bottomLeft = left3 + blackKeyWidth + blackKeyDistance
-                keyGeometries[11 + 12 * i].topRight = left3 + 2 * blackKeyWidth + blackKeyDistance
-                keyGeometries[11 + 12 * i].bottomRight = left3 + 2 * blackKeyWidth + blackKeyDistance
+                keyGeometries[11 + 12 * i].topLeft = left3 + blackKeyWidth + blackKeyDistanceWhen3
+                keyGeometries[11 + 12 * i].bottomLeft = left3 + blackKeyWidth + blackKeyDistanceWhen3
+                keyGeometries[11 + 12 * i].topRight = left3 + 2 * blackKeyWidth + blackKeyDistanceWhen3
+                keyGeometries[11 + 12 * i].bottomRight = left3 + 2 * blackKeyWidth + blackKeyDistanceWhen3
             }
             keyGeometries[13 + 12 * i].isBlack = true
-            keyGeometries[13 + 12 * i].topLeft = left3 + 2 * blackKeyWidth + 2 * blackKeyDistance
-            keyGeometries[13 + 12 * i].bottomLeft = left3 + 2 * blackKeyWidth + 2 * blackKeyDistance
-            keyGeometries[13 + 12 * i].topRight = left3 + 3 * blackKeyWidth + 2 * blackKeyDistance
-            keyGeometries[13 + 12 * i].bottomRight = left3 + 3 * blackKeyWidth + 2 * blackKeyDistance
+            keyGeometries[13 + 12 * i].topLeft = left3 + 2 * blackKeyWidth + 2 * blackKeyDistanceWhen3
+            keyGeometries[13 + 12 * i].bottomLeft = left3 + 2 * blackKeyWidth + 2 * blackKeyDistanceWhen3
+            keyGeometries[13 + 12 * i].topRight = left3 + 3 * blackKeyWidth + 2 * blackKeyDistanceWhen3
+            keyGeometries[13 + 12 * i].bottomRight = left3 + 3 * blackKeyWidth + 2 * blackKeyDistanceWhen3
         }
 
         let whiteKeyIndicies: [Int] = keyGeometries.enumerated().compactMap { !$0.element.isBlack ? $0.offset : nil }
