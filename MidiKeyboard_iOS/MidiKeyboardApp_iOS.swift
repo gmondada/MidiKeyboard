@@ -17,6 +17,7 @@ struct MidiKeyboardApp: App {
         WindowGroup {
             VStack {
                 PedalView(model: keyboardModel)
+                Spacer(minLength: 10)
                 KeyboardView(model: keyboardModel)
             }
         }

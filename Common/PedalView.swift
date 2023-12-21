@@ -23,6 +23,7 @@ struct PedalView: View {
             Toggle("Soft", isOn: $model.softPedal)
             Toggle("Damper", isOn: $model.damperPedal)
         }
+        .toggleStyle(.button)
     }
 }
 
