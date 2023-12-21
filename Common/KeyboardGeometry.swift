@@ -9,6 +9,8 @@
 import Foundation
 
 class KeyboardGeometry {
+    // see: https://datagenetics.com/blog/may32016/index.html
+    // see: http://www.quadibloc.com/other/cnv05.htm
 
     struct KeyGeometry {
         var isBlack: Bool = false
@@ -18,14 +20,23 @@ class KeyboardGeometry {
         var bottomRight: CGFloat = 0
     }
 
-    private let rawWhiteKeyWidth: CGFloat
+    static let whiteKeyCount = 7 * 7 + 3
+    static let blackKeyCount = 7 * 5 + 1
+    static let keyCount = 88
 
-    let keyCount = 88
-    let whiteKeyCount = 7 * 7 + 3
-    let blackKeyCount = 7 * 5 + 1
+    // preferred aspect
+    static let whiteKeyAspectRatio: CGFloat = 5.25
+    static let blackKeyLengthRatio: CGFloat = 0.65 // ratio between black and white key length
+    static let keyboardAspectRatio: CGFloat = whiteKeyAspectRatio / CGFloat(whiteKeyCount)
+
+    let whiteKeyCount = whiteKeyCount
+    let blackKeyCount = blackKeyCount
+    let keyCount = keyCount
+
     let pixelLength: CGFloat
     let gap: CGFloat
-    let size: CGSize  // gaps included
+    let size: CGSize // gaps included
+    let preferredSize: CGSize // gaps included
     let whiteKeyLength: CGFloat // gaps not included
     let blackKeyLength: CGFloat // gaps not included
     let whiteKeyRadius: CGFloat
@@ -35,12 +46,11 @@ class KeyboardGeometry {
     let whiteKeyIndicies: [Int]
     let blackKeyIndicies: [Int]
 
-    init(keyboardWidth width: CGFloat, pixelLength: CGFloat) {
-        // see: https://datagenetics.com/blog/may32016/index.html
-        // see: http://www.quadibloc.com/other/cnv05.htm
+    private let rawWhiteKeyWidth: CGFloat
 
+    init(size: CGSize, pixelLength: CGFloat) {
         assert(keyCount == whiteKeyCount + blackKeyCount)
-
+        self.size = size
         self.pixelLength = pixelLength
         let align = {(x: CGFloat) -> CGFloat in
             if pixelLength == 0 {
@@ -50,18 +60,21 @@ class KeyboardGeometry {
             }
         }
 
-        let keyboardWidth = max(CGFloat(keyCount) * 5 * pixelLength, width)
+        let keyboardWidth = size.width
         gap = max(pixelLength, align(keyboardWidth / 1000))
         rawWhiteKeyWidth = (keyboardWidth - gap) / CGFloat(whiteKeyCount)
         let rawBlackKeyWidth = rawWhiteKeyWidth * 14.0 / 24.0
         let rawBlackKeyDistance = rawBlackKeyWidth
-        let rawWhiteKeyLength = rawWhiteKeyWidth * 5.25
+        let rawWhiteKeyLength = size.height - 2 * gap
         let rawBlackKeyLength = rawWhiteKeyLength * 0.65
         let blackKeyWidth = align(rawBlackKeyWidth)
         let blackKeyDistance = align(rawBlackKeyDistance)
         whiteKeyLength = align(rawWhiteKeyLength)
         blackKeyLength = align(rawBlackKeyLength)
-        size = CGSize(width: align(keyboardWidth), height: whiteKeyLength + 2 * gap)
+        preferredSize = CGSize(width: align(keyboardWidth), height: whiteKeyLength + 2 * gap)
+
+        whiteKeyRadius = rawWhiteKeyWidth * 0.1
+        blackKeyRadius = rawBlackKeyWidth * 0.18
 
         var keyGeometries: [KeyGeometry] = .init(repeating: KeyGeometry(), count: 88)
 
@@ -128,8 +141,6 @@ class KeyboardGeometry {
         self.keyGeometries = keyGeometries
         self.whiteKeyIndicies = whiteKeyIndicies
         self.blackKeyIndicies = blackKeyIndicies
-        self.whiteKeyRadius = rawWhiteKeyWidth * 0.1
-        self.blackKeyRadius = rawBlackKeyWidth * 0.18
     }
 
     func keyIndex(at location: CGPoint) -> Int {

@@ -36,25 +36,44 @@ struct KeyboardView: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
-            let keyboardGeometry = KeyboardGeometry(keyboardWidth: geo.size.width, pixelLength: pixelLength)
-            ZStack {
-                ForEach(keyboardGeometry.whiteKeyIndicies, id: \.self) { i in
-                    let keyGeometry = keyboardGeometry.keyGeometries[i]
-                    WhiteKeyView(keyboardGeometry: keyboardGeometry, model: model, keyIndex: i)
-                        .frame(width: keyGeometry.bottomRight - keyGeometry.bottomLeft, height: keyboardGeometry.whiteKeyLength)
-                        .position(x: (keyGeometry.bottomRight + keyGeometry.bottomLeft) / 2, y: keyboardGeometry.gap + keyboardGeometry.whiteKeyLength / 2)
+        KeyboardLayout {
+            GeometryReader { geo in
+                let keyboardGeometry = KeyboardGeometry(size: geo.size, pixelLength: pixelLength)
+                ZStack {
+                    ForEach(keyboardGeometry.whiteKeyIndicies, id: \.self) { i in
+                        let keyGeometry = keyboardGeometry.keyGeometries[i]
+                        WhiteKeyView(keyboardGeometry: keyboardGeometry, model: model, keyIndex: i)
+                            .frame(width: keyGeometry.bottomRight - keyGeometry.bottomLeft, height: keyboardGeometry.whiteKeyLength)
+                            .position(x: (keyGeometry.bottomRight + keyGeometry.bottomLeft) / 2, y: keyboardGeometry.gap + keyboardGeometry.whiteKeyLength / 2)
+                    }
+                    ForEach(keyboardGeometry.blackKeyIndicies, id: \.self) { i in
+                        let keyGeometry = keyboardGeometry.keyGeometries[i]
+                        BlackKeyView(keyboardGeometry: keyboardGeometry, model: model, keyIndex: i)
+                            .frame(width: keyGeometry.bottomRight - keyGeometry.bottomLeft, height: keyboardGeometry.blackKeyLength)
+                            .position(x: (keyGeometry.bottomRight + keyGeometry.bottomLeft) / 2, y: keyboardGeometry.gap + keyboardGeometry.blackKeyLength / 2)
+                    }
                 }
-                ForEach(keyboardGeometry.blackKeyIndicies, id: \.self) { i in
-                    let keyGeometry = keyboardGeometry.keyGeometries[i]
-                    BlackKeyView(keyboardGeometry: keyboardGeometry, model: model, keyIndex: i)
-                        .frame(width: keyGeometry.bottomRight - keyGeometry.bottomLeft, height: keyboardGeometry.blackKeyLength)
-                        .position(x: (keyGeometry.bottomRight + keyGeometry.bottomLeft) / 2, y: keyboardGeometry.gap + keyboardGeometry.blackKeyLength / 2)
-                }
+                .background(Color(white: 0.3))
+                .gesture(glissandoGesture(keyboardGeometry: keyboardGeometry))
+                .frame(width: keyboardGeometry.size.width, height: keyboardGeometry.size.height)
             }
-            .background(Color(white:0.4))
-            .gesture(glissandoGesture(keyboardGeometry: keyboardGeometry))
-            .frame(width: keyboardGeometry.size.width, height: keyboardGeometry.size.height)
+        }
+    }
+}
+
+private struct KeyboardLayout: Layout {
+    @Environment(\.pixelLength) private var pixelLength: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+        let width = max(320, proposal.width ?? 0)
+        return CGSize(width: width, height: width * KeyboardGeometry.keyboardAspectRatio)
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+        let proposal = ProposedViewSize(width: bounds.size.width, height: bounds.size.height)
+        let center = CGPoint(x: bounds.midX, y: bounds.midY)
+        for subview in subviews {
+            subview.place(at: center, anchor: .center, proposal: proposal)
         }
     }
 }
@@ -65,7 +84,7 @@ private struct WhiteKeyShape: Shape {
     let notchHeight: CGFloat
     let bottomRadius: CGFloat
     func path(in rect: CGRect) -> Path {
-            var path = Path()
+        var path = Path()
 
         if leftNotch > 0 {
             path.move(to: CGPoint(x: rect.minX, y: rect.minY + notchHeight))
@@ -87,7 +106,6 @@ private struct WhiteKeyShape: Shape {
 
         return path
     }
-
 }
 
 private struct WhiteKeyView: View {
